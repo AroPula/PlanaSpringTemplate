@@ -1,4 +1,4 @@
-package spring;
+package com.spring;
 
 import com.spring.config.AppConfig;
 import com.spring.service.UserService;

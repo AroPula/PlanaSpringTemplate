@@ -1,4 +1,4 @@
-package com.richuff.service;
+package richuff.service;
 
 public interface UserService {
     void test();

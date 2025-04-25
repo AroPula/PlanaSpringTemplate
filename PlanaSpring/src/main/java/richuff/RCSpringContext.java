@@ -1,4 +1,4 @@
-package com.richuff;
+package richuff;
 
 import com.richuff.anno.Component;
 import com.richuff.anno.ComponentScan;

@@ -1,7 +1,7 @@
-package com.richuff.service.Impl;
+package spring.service.Impl;
 
-import com.richuff.anno.Component;
-import com.richuff.service.UserService;
+import spring.service.UserService;
+import org.springframework.stereotype.Component;
 
 @Component("userService")
 public class UserServiceImpl implements UserService {

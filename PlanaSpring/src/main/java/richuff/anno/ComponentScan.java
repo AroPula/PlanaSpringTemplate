@@ -1,4 +1,4 @@
-package com.richuff.anno;
+package richuff.anno;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -7,6 +7,6 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
-public @interface Component {
+public @interface ComponentScan {
     String value() default "";
 }

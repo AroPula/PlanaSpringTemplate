@@ -1,4 +1,5 @@
-package richuff.config;
+package com.richuff.appconfig;
+
 
 import com.richuff.anno.ComponentScan;
 

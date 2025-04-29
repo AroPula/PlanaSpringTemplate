@@ -1,34 +1,42 @@
 package com.richuff;
 
+import com.richuff.anno.*;
 import com.richuff.entity.BeanDefinition;
-import com.richuff.anno.Component;
-import com.richuff.anno.ComponentScan;
-import com.richuff.anno.Scope;
+import com.richuff.config.BeanNameWare;
+import com.richuff.config.BeanPostProcessor;
+import com.richuff.config.InitializingBean;
 
 import java.io.File;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 
-public class RCSpringContext {
+public class PlanaSpringContext {
     private Class<?> configClass;
 
     private ConcurrentHashMap<String,Object> singletonMap = new ConcurrentHashMap<>();
     private ConcurrentHashMap<String,BeanDefinition> beanDefinitionHashMap = new ConcurrentHashMap<>();
+    private List<BeanPostProcessor> beanPostProcessorList = new ArrayList<>();
 
-    public RCSpringContext(Class<?> configClass) {
+    public PlanaSpringContext(Class<?> configClass) {
         this.configClass = configClass;
-
+        //扫描Component
         ScanComponent(configClass);
-
+        //遍历beanDefinitionHashMap,如果为单例的话提前创建好放入单例Map内
         for (Map.Entry<String,BeanDefinition> entry: beanDefinitionHashMap.entrySet()){
             String beanName = entry.getKey();
             BeanDefinition beanDefinition = beanDefinitionHashMap.get(beanName);
+            //为单例
             if (beanDefinition.getScope().equals("singleton")){
-                Object bean = createBean(beanDefinition);
+                //创建bean
+                Object bean = createBean(beanName,beanDefinition);
+                //放入单例Map中
                 singletonMap.put(beanName,bean);
             }
         }
@@ -47,6 +55,7 @@ public class RCSpringContext {
         if (resource != null){
             File dir = new File(resource.getFile());
             if(dir.isDirectory()){
+                //扫描所有带Component的注解
                 ScanFile(dir,loader);
             }else{
                 throw new RuntimeException("this is not a file");
@@ -61,19 +70,51 @@ public class RCSpringContext {
             BeanDefinition beanDefinition = beanDefinitionHashMap.get(beanName);
             String scope = beanDefinition.getScope();
             if (Objects.equals(scope,"singleton")){
+                //为单例直接返回单例Map的bean
                 return singletonMap.get(beanName);
             }else{
-                return createBean(beanDefinition);
+                //不为单例，创建一个bean
+                return createBean(beanName,beanDefinition);
             }
         }else {
             throw new RuntimeException("no keys");
         }
     }
 
-    public Object createBean(BeanDefinition beanDefinition){
+    public Object createBean(String beanName,BeanDefinition beanDefinition){
         Class<?> clazz = beanDefinition.getClazz();
         try {
-            return clazz.getDeclaredConstructor().newInstance();
+            Object instance = clazz.getDeclaredConstructor().newInstance();
+            //获取指定类中声明的所有字段（fields）
+            for(Field field : clazz.getDeclaredFields()){
+                //如果这个自段有Autowired注解
+                if(field.isAnnotationPresent(Autowired.class)){
+                    //根据字段的名字得到bean
+                    Object bean = getBean(field.getName());
+                    field.setAccessible(true);
+                    //将instance的field设置为bean
+                    field.set(instance,bean);
+                }
+            }
+            //如果实现了BeanNameWare接口，就将BeanName返回
+            if (instance instanceof BeanNameWare){
+                ((BeanNameWare)instance).setBeanName(beanName);
+            }
+            for (BeanPostProcessor beanPostProcessor : beanPostProcessorList) {
+                beanPostProcessor.postProcessBeforeInitialization(instance,beanName);
+            }
+            //初始化
+            if (instance instanceof InitializingBean){
+                try{
+                    ((InitializingBean)instance).afterPropertiesSet();
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
+            }
+            for (BeanPostProcessor beanPostProcessor : beanPostProcessorList) {
+                instance = beanPostProcessor.postProcessAfterInitialization(instance,beanName);
+            }
+            return instance;
         } catch (InstantiationException e) {
             e.printStackTrace();
         } catch (IllegalAccessException e) {
@@ -99,13 +140,18 @@ public class RCSpringContext {
 
                     try {
                         Class<?> clazz = loader.loadClass(className);
+                        if (BeanPostProcessor.class.isAssignableFrom(clazz)){
+                            BeanPostProcessor instance = (BeanPostProcessor)clazz.getDeclaredConstructor().newInstance();
+                            beanPostProcessorList.add(instance);
+                        }
                         //判断是不是Bean
                         if (clazz.isAnnotationPresent(Component.class)){
                             Component component = clazz.getDeclaredAnnotation(Component.class);
                             String beanName = component.value();
-
+                            //设置 BeanDefinition
                             BeanDefinition beanDefinition = new BeanDefinition();
                             beanDefinition.setClazz(clazz);
+                            //有scope注解则为scope的值，否则为单例模式
                             if (clazz.isAnnotationPresent(Scope.class)){
                                 Scope scope = clazz.getDeclaredAnnotation(Scope.class);
                                 beanDefinition.setScope(scope.value());
@@ -115,6 +161,14 @@ public class RCSpringContext {
                             beanDefinitionHashMap.put(beanName,beanDefinition);
                         }
                     }catch (ClassNotFoundException e){
+                        e.printStackTrace();
+                    } catch (InvocationTargetException e) {
+                        e.printStackTrace();
+                    } catch (InstantiationException e) {
+                        e.printStackTrace();
+                    } catch (IllegalAccessException e) {
+                        e.printStackTrace();
+                    } catch (NoSuchMethodException e) {
                         e.printStackTrace();
                     }
                 }

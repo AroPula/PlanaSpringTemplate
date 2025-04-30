@@ -13,6 +13,7 @@
         <module>PlanaSpring</module>
         <module>PlanaTomcat</module>
         <module>PlanaDubbo</module>
+        <module>PlanaMybatis</module>
     </modules>
 
     <properties>
@@ -27,10 +28,10 @@
             <artifactId>spring-context</artifactId>
             <version>6.1.14</version>
         </dependency>
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <version>1.18.36</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.projectlombok</groupId>-->
+<!--            <artifactId>lombok</artifactId>-->
+<!--            <version>1.18.36</version>-->
+<!--        </dependency>-->
     </dependencies>
 </project>

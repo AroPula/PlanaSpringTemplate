@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<mapper namespace="com.richuff.mapper.UserMapper">
+    <select id="list" resultType="com.richuff.entity.User">
+        select * from user
+    </select>
+
+    <select id="findUserById" resultType="java.lang.Integer">
+        select * from user where id = #{id}
+    </select>
+
+    <insert id="addUser" parameterType="com.richuff.entity.User">
+        insert into user(id,name,age) values(#{id},#{name},#{age})
+    </insert>
+
+    <update id="updateUser" parameterType="com.richuff.entity.User">
+        update user set name=#{name},age=#{age} where id = #{id}
+    </update>
+
+    <delete id="deleteUser" parameterType="com.richuff.entity.User">
+        delete from user where id=#{id}
+    </delete>
+</mapper>

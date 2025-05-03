@@ -22,31 +22,54 @@
 ### Spring 示例
 
 ```java
-// 定义一个简单的 Bean
+import org.springframework.stereotype.Component;
+
+// 定义一个简单的Bean UserService.java
+public interface UserService {
+    void sayHello();
+}
+
+//实现接口 Impl/UserServiceImpl.java
 @Component
-public class HelloWorldService {
-    public void sayHello() {
-        System.out.println("Hello, Plana Spring Template!");
+public class UserServiceImpl implements UserService{
+    public void sayHello(){
+        System.out.println("Plana Spring Template!");
     }
 }
 
-public class SpringExample {
+//设置扫描路径 AppConfig.java
+@ComponentScan("com.spring.service")
+public class AppConfig {
+
+}
+
+//测试类 PlanaSpringExample.java
+public class PlanaSpringExample {
     public static void main(String[] args) {
-        // 初始化 Spring 容器
-        AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
-        context.scan("com.plana.springtemplate.example");
-        context.refresh();
-
-        // 从容器中获取 Bean 并调用方法
-        HelloWorldService service = context.getBean(HelloWorldService.class);
-        service.sayHello();
-
-        // 关闭容器
-        context.close();
+        AnnotationConfigApplicationContext applicationContext = new AnnotationConfigApplicationContext(AppConfig.class);
+        UserService userService = applicationContext.getBean("userService", UserService.class);
+        userService.sayHello();
     }
 }
 ```
 
+```java
+@Component("userService") //给bean命名
+@Scope("prototype")  //声明是否为单例，默认为singleton单例
+public class UserServiceImpl implements UserService {
+
+    @Autowired  //自动装配
+    private OrderService orderService;
+
+    private String BeanName;
+    
+    @Override
+    public void test() {
+        System.out.println(orderService.order());
+    }
+
+}
+```
 ### Tomcat 示例
 
 ```java

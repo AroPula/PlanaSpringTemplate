@@ -46,9 +46,9 @@ public class SqlSessionDefault implements SqlSession{
      * @param <T> 泛型
      */
     @Override
-    public <T> T getMapper(Class<T> clazz) {
+    public <T> Object getMapper(Class<T> clazz) {
         ClassLoader cl = clazz.getClassLoader();
-        Object o = Proxy.newProxyInstance(cl, new Class[]{clazz}, (proxy, method, args) -> {
+        return Proxy.newProxyInstance(cl, new Class[]{clazz}, (proxy, method, args) -> {
             //获取接口方法名
             String methodName = method.getName();
             //获取接口全类名
@@ -71,6 +71,5 @@ public class SqlSessionDefault implements SqlSession{
                 return selectOne(statementId, args);
             }
         });
-        return (T)o;
     }
 }

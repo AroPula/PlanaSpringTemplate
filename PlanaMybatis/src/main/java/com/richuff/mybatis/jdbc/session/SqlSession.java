@@ -65,5 +65,5 @@ public interface SqlSession{
      * @throws Exception 方法执行的异常
      * @author richu
      */
-    <T> T getMapper(Class<T> clazz) throws Exception;
+    <T> Object getMapper(Class<T> clazz) throws Exception;
 }

@@ -2,16 +2,9 @@ package com.richuff;
 
 import com.richuff.dao.UserDao;
 import com.richuff.mapper.UserMapper;
-import com.richuff.mybatis.config.Configuration;
-import com.richuff.mybatis.type.MappedStatement;
 import org.junit.Test;
 
-import javax.sql.DataSource;
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 
 
 public class ProxyTest {

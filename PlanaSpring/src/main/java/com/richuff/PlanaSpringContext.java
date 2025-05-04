@@ -149,15 +149,7 @@ public class PlanaSpringContext {
                             Component component = clazz.getDeclaredAnnotation(Component.class);
                             String beanName = component.value();
                             //设置 BeanDefinition
-                            BeanDefinition beanDefinition = new BeanDefinition();
-                            beanDefinition.setClazz(clazz);
-                            //有scope注解则为scope的值，否则为单例模式
-                            if (clazz.isAnnotationPresent(Scope.class)){
-                                Scope scope = clazz.getDeclaredAnnotation(Scope.class);
-                                beanDefinition.setScope(scope.value());
-                            }else{
-                                beanDefinition.setScope("singleton");
-                            }
+                            BeanDefinition beanDefinition = getBeanDefinition(clazz);
                             beanDefinitionHashMap.put(beanName,beanDefinition);
                         }
                     }catch (ClassNotFoundException e){
@@ -174,5 +166,18 @@ public class PlanaSpringContext {
                 }
             }
         }
+    }
+
+    private static BeanDefinition getBeanDefinition(Class<?> clazz) {
+        BeanDefinition beanDefinition = new BeanDefinition();
+        beanDefinition.setClazz(clazz);
+        //有scope注解则为scope的值，否则为单例模式
+        if (clazz.isAnnotationPresent(Scope.class)){
+            Scope scope = clazz.getDeclaredAnnotation(Scope.class);
+            beanDefinition.setScope(scope.value());
+        }else{
+            beanDefinition.setScope("singleton");
+        }
+        return beanDefinition;
     }
 }

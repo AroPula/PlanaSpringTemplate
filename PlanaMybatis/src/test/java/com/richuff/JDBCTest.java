@@ -23,7 +23,7 @@ public class JDBCTest {
             preparedStatement = connection.prepareStatement("select * from user");
             resultSet = preparedStatement.executeQuery();
             while (resultSet.next()){
-                int id = resultSet.getInt("id");
+                Long id = resultSet.getLong("id");
                 String name = resultSet.getString("name");
                 int age = resultSet.getInt("age");
                 userList.add(User.builder().id(id).name(name).age(age).build());

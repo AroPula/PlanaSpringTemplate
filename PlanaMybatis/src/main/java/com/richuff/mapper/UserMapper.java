@@ -7,7 +7,7 @@ import java.util.List;
 public interface UserMapper {
     List<User> list();
 
-    User findUserById(Integer id);
+    User findUserById(Long id);
 
     void addUser(User user);
 

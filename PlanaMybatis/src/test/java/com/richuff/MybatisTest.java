@@ -1,6 +1,7 @@
 package com.richuff;
 
 import com.richuff.dao.UserDao;
+import com.richuff.entity.User;
 import com.richuff.mapper.UserMapper;
 import com.richuff.mybatis.io.Resource;
 import com.richuff.mybatis.jdbc.session.*;
@@ -9,6 +10,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.InputStream;
+import java.util.List;
 
 @Slf4j
 public class MybatisTest {
@@ -20,9 +22,8 @@ public class MybatisTest {
         InputStream resource = Resource.getResourceAsStream(resourceName);
         SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(resource);
         SqlSessionDefault sqlSession = (SqlSessionDefault) sqlSessionFactory.openSession();
-        UserDao userDao = (UserDao) sqlSession.getMapper(UserDao.class);
-        int count = userDao.add(10);
-        System.out.println("count = " + count);
+        userMapper = (UserMapper) sqlSession.getMapper(UserMapper.class);
+
 //        System.out.println("sqlSession = " + sqlSession);
 //        System.out.println("sqlSession.configuration.getMappedStatementMap() = " + sqlSession.configuration.getMappedStatementMap());
 //        String resourceName = "mapper/UserMapper.xml";
@@ -36,9 +37,17 @@ public class MybatisTest {
 
     @Test
     public void TestMybatis(){
-
+        List<User> users= userMapper.list();
+        System.out.println("users = " + users);
         //加载配置文件
         //List<User> userList = userMapper.list();
         //System.out.println("userList.toString() = " + userList.toString());
+    }
+
+    @Test
+    public void testGet(){
+        Long id = 10L;
+        User user = userMapper.findUserById(id);
+        System.out.println("user = " + user);
     }
 }

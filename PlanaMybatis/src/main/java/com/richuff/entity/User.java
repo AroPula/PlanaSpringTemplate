@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 public class User {
-    private int id;
+    private Long id;
     private String name;
     private int age;
 }

@@ -4,7 +4,7 @@
         select * from user
     </select>
 
-    <select id="findUserById" resultType="java.lang.Integer">
+    <select id="findUserById" parameterType="java.lang.Long" resultType="java.lang.Long">
         select * from user where id = #{id}
     </select>
 

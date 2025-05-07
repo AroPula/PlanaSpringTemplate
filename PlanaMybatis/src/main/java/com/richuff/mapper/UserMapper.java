@@ -9,9 +9,9 @@ public interface UserMapper {
 
     User findUserById(Long id);
 
-    void addUser(User user);
+    Integer addUser(User user);
 
-    void updateUser(User user);
+    Integer updateUser(User user);
 
-    void deleteUser(Integer id);
+    Integer deleteUser(Long id);
 }

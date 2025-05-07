@@ -46,8 +46,31 @@ public class MybatisTest {
 
     @Test
     public void testGet(){
-        Long id = 10L;
+        Long id = 3L;
         User user = userMapper.findUserById(id);
         System.out.println("user = " + user);
+    }
+
+    @Test
+    public void testDelete(){
+        Long id = 3L;
+        Integer count = userMapper.deleteUser(id);
+        System.out.println("count = " + count);
+    }
+
+    @Test
+    public void testUpdate(){
+        Integer integer = Integer.valueOf("100");
+        User user = User.builder().id(666L).name("cnm").age(integer).build();
+        Integer count = userMapper.updateUser(user);
+        System.out.println("count = " + count);
+    }
+
+    @Test
+    public void testInsert(){
+        Integer integer = Integer.valueOf("100");
+        User user = User.builder().id(3L).name("cnm").age(integer).build();
+        Integer count = userMapper.addUser(user);
+        System.out.println("count = " + count);
     }
 }

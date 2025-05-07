@@ -4,7 +4,7 @@
         select * from user
     </select>
 
-    <select id="findUserById" parameterType="java.lang.Long" resultType="java.lang.Long">
+    <select id="findUserById" parameterType="java.lang.Long" resultType="com.richuff.entity.User">
         select * from user where id = #{id}
     </select>
 
@@ -16,7 +16,7 @@
         update user set name=#{name},age=#{age} where id = #{id}
     </update>
 
-    <delete id="deleteUser" parameterType="com.richuff.entity.User">
+    <delete id="deleteUser"  parameterType="java.lang.Long">
         delete from user where id=#{id}
     </delete>
 </mapper>

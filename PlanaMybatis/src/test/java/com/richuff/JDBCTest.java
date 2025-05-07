@@ -26,6 +26,7 @@ public class JDBCTest {
                 Long id = resultSet.getLong("id");
                 String name = resultSet.getString("name");
                 int age = resultSet.getInt("age");
+                //String age = resultSet.getString("age");
                 userList.add(User.builder().id(id).name(name).age(age).build());
             }
             System.out.println("userList.toString() = " + userList.toString());

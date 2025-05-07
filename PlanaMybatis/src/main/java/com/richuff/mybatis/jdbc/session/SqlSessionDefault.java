@@ -1,6 +1,8 @@
 package com.richuff.mybatis.jdbc.session;
 
 import com.richuff.mybatis.config.Configuration;
+import com.richuff.mybatis.executor.SimpleExecutor;
+import com.richuff.mybatis.type.MappedStatement;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Proxy;
@@ -16,27 +18,64 @@ public class SqlSessionDefault implements SqlSession{
 
     @Override
     public <E> List<E> selectList(String statement, Object... params) throws Exception {
-        return List.of();
+        SimpleExecutor simpleExecutor = new SimpleExecutor();
+        MappedStatement mappedStatement = this.configuration.getMappedStatementMap().get(statement);
+        return simpleExecutor.query(configuration, mappedStatement, params);
     }
 
     @Override
     public <E> E selectOne(String statement, Object... params) throws Exception {
-        return null;
+        SimpleExecutor simpleExecutor = new SimpleExecutor();
+        MappedStatement mappedStatement = this.configuration.getMappedStatementMap().get(statement);
+        if (params[0].getClass() == Long.class){
+            simpleExecutor.query(configuration, mappedStatement, params);
+        } else if (params[0].getClass() == Integer.class) {
+            simpleExecutor.query(configuration, mappedStatement, params);
+        }
+        List<Object> querys = selectList(statement, params);
+        if (querys.size() == 1){
+            return (E) querys.get(0);
+        } else if (!querys.isEmpty()) {
+            throw new RuntimeException("查询结果不唯一");
+        }else {
+            return null;
+        }
     }
 
     @Override
     public <E> E insert(String statement, Object... params) throws Exception {
-        return null;
+        SimpleExecutor simpleExecutor = new SimpleExecutor();
+        MappedStatement mappedStatement = this.configuration.getMappedStatementMap().get(statement);
+        List<Object> list = simpleExecutor.query(configuration, mappedStatement, params);
+        if (!list.isEmpty()){
+            return (E) list.get(0);
+        }else{
+            return (E) "0";
+        }
     }
 
     @Override
     public <E> E update(String statement, Object... params) throws Exception {
-        return null;
+        SimpleExecutor simpleExecutor = new SimpleExecutor();
+        MappedStatement mappedStatement = this.configuration.getMappedStatementMap().get(statement);
+        List<Object> list = simpleExecutor.query(configuration, mappedStatement, params);
+        if (!list.isEmpty()){
+            return (E) list.get(0);
+        }else{
+            return (E) "0";
+        }
     }
 
     @Override
     public <E> E delete(String statement, Object... params) throws Exception {
-        return null;
+        SimpleExecutor simpleExecutor = new SimpleExecutor();
+        MappedStatement mappedStatement = this.configuration.getMappedStatementMap().get(statement);
+        List<Object> list = simpleExecutor.query(configuration, mappedStatement, params);
+        if (!list.isEmpty()){
+            return (E) list.get(0);
+        }else{
+            return (E) "0";
+        }
     }
 
     /**
@@ -65,8 +104,7 @@ public class SqlSessionDefault implements SqlSession{
                 return delete(statementId,args);
             }
             if (returnType instanceof ParameterizedType){
-                List<Object> objects = selectList(statementId, args);
-                return objects;
+                return selectList(statementId, args);
             }else{
                 return selectOne(statementId, args);
             }

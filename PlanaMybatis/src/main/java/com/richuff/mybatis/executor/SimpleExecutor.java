@@ -40,34 +40,45 @@ public class SimpleExecutor implements Executor{
             //获取sql语句的参数集合
             List<String> parameterMappingList = boundSql.getParameterMappingList();
             if (parameterClass != null){
-                if ("java.lang.Long".equals(parameterClass.getName()) ||
-                        "java.lang.Integer".equals(parameterClass.getName())){
+                if (Number.class.isAssignableFrom(parameterClass)){
                     preparedStatement.setObject(1,args[0]);
                 }else {
-                    for (int i = 0; i < parameterMappingList.size(); i++) {
-                        String content = parameterMappingList.get(i);
-                        //获取参数的字段
-                        Field field = parameterClass.getDeclaredField(content);
+                    Field[] fields = parameterClass.getDeclaredFields();
+                    for (int i = 0; i < fields.length; i++) {
+                        Field field = fields[i];
                         field.setAccessible(true);
-                        //得到每个字段的类
-                        Object data = field.get(paramsList.get(i));
-                        //设置进preparedStatement
-                        preparedStatement.setObject(i+1,data);
+                        try {
+                            Object value = field.get(args[0]); // 获取字段值
+                            int index = paramsList.indexOf(field.getName())+1;
+                            preparedStatement.setObject(index, value); // 设置到 PreparedStatement
+                        } catch (IllegalAccessException e) {
+                            e.printStackTrace();
+                        }
                     }
+//                    for (int i = 0; i < parameterMappingList.size(); i++) {
+//                        String content = parameterMappingList.get(i);
+//                        //获取参数的字段
+//                        Field field = parameterClass.getDeclaredField(content);
+//                        field.setAccessible(true);
+//                        //得到每个字段的类
+//                        Object data = field.get(paramsList.get(i));
+//                        //设置进preparedStatement
+//                        preparedStatement.setObject(i+1,data);
+//                    }
                 }
             }
 
 
             //执行sql
             ResultSet resultSet = null;
-            if (sql.split(" ")[0].equals("update") ||
-                    sql.split(" ")[0].equals("delete") ||
-                    sql.split(" ")[0].equals("insert")) {
-                Integer result = preparedStatement.executeUpdate();
+            if (sql.split(" ")[0].contains("update") ||
+                    sql.split(" ")[0].contains("delete") ||
+                    sql.split(" ")[0].contains("insert")) {
+                int result = preparedStatement.executeUpdate();
                 List<Integer> resultList = new ArrayList<>();
                 resultList.add(result);
                 return (List<E>) resultList;
-            }else{
+            } else{
                 resultSet = preparedStatement.executeQuery();
                 //获取返回值类型
                 Class<?> resultClass = getClass(mappedStatement.getResultType());
@@ -76,6 +87,17 @@ public class SimpleExecutor implements Executor{
                 while (resultSet.next()){
                     //获取返回对象的实例
                     Object instance = resultClass.getConstructor().newInstance();
+//                    if (resultClass == Long.class){
+//                        List<Long> resultList = new ArrayList<>();
+//                        resultList.add(Long.parseLong(String.valueOf(metaData.getColumnCount())));
+//                        return (List<E>) resultList;
+//                    }else if (resultClass == Integer.class){
+//                        List<Integer> resultList = new ArrayList<>();
+//                        resultList.add(metaData.getColumnCount());
+//                        return (List<E>) resultList;
+//                    } else{
+//
+//                    }
                     for (int i = 1; i <= metaData.getColumnCount(); i++) {
                         String columnName = metaData.getColumnName(i);
                         Object value = resultSet.getObject(columnName);
@@ -83,9 +105,13 @@ public class SimpleExecutor implements Executor{
                         //根据反射根据数据库表和实体类的属性和字段的对应的关系数据库
                         PropertyDescriptor propertyDescriptor = new PropertyDescriptor(columnName, resultClass);
                         //获取对应字段的set方法
-                        Method writeMethod = propertyDescriptor.getWriteMethod();
+                        //Method writeMethod = propertyDescriptor.getWriteMethod();
                         //使用set将instance里的columnName字段设置为object
-                        writeMethod.invoke(instance, value);
+                        //writeMethod.invoke(instance, value);
+                        Field field = resultClass.getDeclaredField(columnName);
+                        field.setAccessible(true);
+
+                        field.set(instance,value);
                     }
                     list.add(instance);
                 }
@@ -116,12 +142,6 @@ public class SimpleExecutor implements Executor{
      */
     private BoundSql getBoundSql(String sql) throws InvalidException{
         this.parseSql(sql);
-        Set<Map.Entry<Integer, Integer>> entries = indexMap.entrySet();
-        for (Map.Entry<Integer,Integer> entry:entries){
-            int begin = entry.getKey() + 2;
-            int end = entry.getValue();
-            paramsList.add(sql.substring(begin,end));
-        }
         for (String s:paramsList){
             sql = sql.replace("#{"+s+"}","?");
         }
@@ -144,7 +164,8 @@ public class SimpleExecutor implements Executor{
                 throw new InvalidException("error sql");
             }else{
                 indexMap.put(start,end);
-                findPosition = end+1;
+                paramsList.add(sql.substring(start+2, end));
+                findPosition = end + 1;
                 parseSql(sql);
             }
         }

@@ -18,14 +18,11 @@ import java.util.concurrent.ConcurrentHashMap;
 
 
 public class PlanaSpringContext {
-    private Class<?> configClass;
-
-    private ConcurrentHashMap<String,Object> singletonMap = new ConcurrentHashMap<>();
-    private ConcurrentHashMap<String,BeanDefinition> beanDefinitionHashMap = new ConcurrentHashMap<>();
-    private List<BeanPostProcessor> beanPostProcessorList = new ArrayList<>();
+    private final ConcurrentHashMap<String,Object> singletonMap = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String,BeanDefinition> beanDefinitionHashMap = new ConcurrentHashMap<>();
+    private final List<BeanPostProcessor> beanPostProcessorList = new ArrayList<>();
 
     public PlanaSpringContext(Class<?> configClass) {
-        this.configClass = configClass;
         //扫描Component
         ScanComponent(configClass);
         //遍历beanDefinitionHashMap,如果为单例的话提前创建好放入单例Map内
@@ -115,13 +112,11 @@ public class PlanaSpringContext {
                 instance = beanPostProcessor.postProcessAfterInitialization(instance,beanName);
             }
             return instance;
-        } catch (InstantiationException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
-            e.printStackTrace();
-        } catch (NoSuchMethodException e) {
+        } catch (InstantiationException |
+                 IllegalAccessException |
+                 InvocationTargetException |
+                 NoSuchMethodException
+                e) {
             e.printStackTrace();
         }
         return null;
@@ -152,15 +147,12 @@ public class PlanaSpringContext {
                             BeanDefinition beanDefinition = getBeanDefinition(clazz);
                             beanDefinitionHashMap.put(beanName,beanDefinition);
                         }
-                    }catch (ClassNotFoundException e){
-                        e.printStackTrace();
-                    } catch (InvocationTargetException e) {
-                        e.printStackTrace();
-                    } catch (InstantiationException e) {
-                        e.printStackTrace();
-                    } catch (IllegalAccessException e) {
-                        e.printStackTrace();
-                    } catch (NoSuchMethodException e) {
+                    }catch (ClassNotFoundException |
+                            InvocationTargetException |
+                            IllegalAccessException |
+                            InstantiationException |
+                            NoSuchMethodException
+                            e){
                         e.printStackTrace();
                     }
                 }

@@ -1,10 +1,8 @@
 package com.richuff.mybatis.config;
 
-import com.richuff.mybatis.util.ParameterMapping;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Data

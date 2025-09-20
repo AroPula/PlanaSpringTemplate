@@ -16,7 +16,7 @@ public class ZooTestWatch {
     public void Test(){
         ExponentialBackoffRetry retry = new ExponentialBackoffRetry(3000, 10);
         CuratorFramework nClient = CuratorFrameworkFactory.builder()
-                .connectString("192.168.31.175:2181")
+                .connectString("192.168.3.133:2181")
                 .sessionTimeoutMs(60 * 1000)
                 .connectionTimeoutMs(15 * 1000)
                 .retryPolicy(retry).build();

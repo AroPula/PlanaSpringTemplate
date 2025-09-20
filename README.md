@@ -66,6 +66,110 @@ public class UserServiceImpl implements UserService {
 }
 ```
 
+### Mybatis示例
+> 1.书写mybatis-config配置文件
+```xml
+<configuration>
+    <!-- dataSource为数据库连接源 -->
+    <dataSource>
+        <property name="driveClass" value="com.mysql.cj.jdbc.Driver"/>
+        <property name="jdbcUrl" value="jdbc:mysql://localhost:3306/richu1?useSSL=false&amp;serverTimezone=UTC"/>
+        <property name="username" value="root"/>
+        <property name="password" value="password"/>
+    </dataSource>
+
+    <!-- mapper为Mapper-xml文件的位置 -->
+    <mapper resource="mapper/UserMapper.xml"/>
+</configuration>
+```
+
+> 2.书写mapper文件
+> 这里给出一个userMapper的实例java接口文件
+```java
+public interface UserMapper {
+    List<User> list();
+
+    User findUserById(Long id);
+
+    Integer addUser(User user);
+
+    Integer updateUser(User user);
+
+    Integer deleteUser(Long id);
+}
+```
+> 这里给出一个userMapper的实例xml文件
+``` xml
+<?xml version="1.0" encoding="UTF-8" ?>
+<mapper namespace="com.richuff.mapper.UserMapper">
+    <select id="list" resultType="com.richuff.entity.User">
+        select * from user
+    </select>
+
+    <select id="findUserById" parameterType="java.lang.Long" resultType="com.richuff.entity.User">
+        select * from user where id = #{id}
+    </select>
+
+    <insert id="addUser" parameterType="com.richuff.entity.User">
+        insert into user(id,name,age) values(#{id},#{name},#{age})
+    </insert>
+
+    <update id="updateUser" parameterType="com.richuff.entity.User">
+        update user set name=#{name},age=#{age} where id = #{id}
+    </update>
+
+    <delete id="deleteUser"  parameterType="java.lang.Long">
+        delete from user where id=#{id}
+    </delete>
+</mapper>
+```
+
+> 3.在Java代码中初始化mybatis并调用Mapper
+```java
+public class MybatisTest {
+    UserMapper userMapper;
+
+    @Before
+    public void init()  {
+        String resourceName = "mybatis-config.xml";
+        InputStream resource = Resource.getResourceAsStream(resourceName);
+        SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(resource);
+        SqlSessionDefault sqlSession = (SqlSessionDefault) sqlSessionFactory.openSession();
+        userMapper = (UserMapper) sqlSession.getMapper(UserMapper.class);
+    }
+
+    @Test
+    public void testGet(){
+        Long id = 3L;
+        User user = userMapper.findUserById(id);
+        System.out.println("user = " + user);
+    }
+
+    @Test
+    public void testDelete(){
+        Long id = 3L;
+        Integer count = userMapper.deleteUser(id);
+        System.out.println("count = " + count);
+    }
+
+    @Test
+    public void testUpdate(){
+        Integer integer = Integer.valueOf("100");
+        User user = User.builder().id(666L).name("cnm").age(integer).build();
+        Integer count = userMapper.updateUser(user);
+        System.out.println("count = " + count);
+    }
+
+    @Test
+    public void testInsert(){
+        Integer integer = Integer.valueOf("100");
+        User user = User.builder().id(3L).name("cnm").age(integer).build();
+        Integer count = userMapper.addUser(user);
+        System.out.println("count = " + count);
+    }
+}
+```
+
 ## 贡献指南
 
 欢迎对本项目进行贡献！
